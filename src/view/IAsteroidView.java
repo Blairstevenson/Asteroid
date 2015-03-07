@@ -7,6 +7,8 @@ public interface IAsteroidView {
     public void removeGameElement(IDrawable e);
     public void clearGameElement();
     public Object getSynchronizedObject();
+    public void showEnemyCount(int enemy);
+    public void showNotification(String notification);
     //
     public void addKeyListener(KeyListener kl);
     public int getWidth();

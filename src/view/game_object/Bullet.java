@@ -5,7 +5,7 @@ import java.awt.Graphics;
 public class Bullet extends BaseGameObject {
 
     @Override
-    public boolean isInside(int x, int y) {
+    public boolean contains(int x, int y) {
         return x == this.getPosx() && y == this.getPosy();
     }
 

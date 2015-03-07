@@ -10,7 +10,14 @@ public abstract class GameComponent {
     private int velx; // velocity
     private int vely;
 
-    public abstract boolean isInside(int x, int y);
+    /**
+     * Check if a point is inside this component.
+     *
+     * @param x x coordinate of the point.
+     * @param y y coordinate of the point.
+     * @return true if the point is inside, false otherwise.
+     */
+    public abstract boolean contains(int x, int y);
 
     /**
      * Move to next position based on velocity.

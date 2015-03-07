@@ -16,6 +16,8 @@ public class BasicGamePanel extends Canvas implements IAsteroidView,
 
     private final Timer timer;
     private final ArrayList<IDrawable> elements;
+    private String notification;
+    private int enemy;
 
     public BasicGamePanel() {
         this.setBackground(Color.black);
@@ -48,13 +50,22 @@ public class BasicGamePanel extends Canvas implements IAsteroidView,
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        // draw all elements inside this panel
         synchronized (this.elements) {
+            // draw all elements inside this panel
             this.elements.stream()
                     .filter((element) -> (element.isVisible()))
                     .forEach((element) -> {
                         element.draw(g);
                     });
+            g.setColor(Color.blue);
+            // draw notification
+            if (this.notification != null) {
+                g.drawString(this.notification,
+                        this.getWidth() / 2 - 7 * this.notification.length() / 2,
+                        this.getHeight() / 2 - 5);
+            }
+            // draw enemy count
+            g.drawString("Asteroid: " + this.enemy, 0, 10);
         }
     }
 
@@ -66,5 +77,15 @@ public class BasicGamePanel extends Canvas implements IAsteroidView,
     @Override
     public Object getSynchronizedObject() {
         return this.elements;
+    }
+
+    @Override
+    public void showEnemyCount(int enemy) {
+        this.enemy = enemy;
+    }
+
+    @Override
+    public void showNotification(String notification) {
+        this.notification = notification;
     }
 }

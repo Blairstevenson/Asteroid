@@ -28,6 +28,7 @@ public class AsteroidController implements ActionListener, KeyListener {
     private final HashMap<Integer, Boolean> keyState;
     // game components
     private SpaceShip ship;
+    private Line bullet;
     private ArrayList<Asteroid> asteroids;
 
     public AsteroidController(IAsteroidView view) {
@@ -49,13 +50,54 @@ public class AsteroidController implements ActionListener, KeyListener {
         this.timer = new Timer(40, this);
     }
 
+    /**
+     * Create asteroid with specific level.
+     *
+     * @param level level of asteroid.
+     * @param safeSpace space in which asteroid is now allowed.
+     * @return newly created asteroid.
+     */
+    private Asteroid createAsteroid(int level, BaseGameObject safeSpace) {
+        // create new asteroid
+        Asteroid a = new Asteroid(level);
+        // random position
+        do {
+            a.setPosition(this.random.nextInt(this.view.getWidth()),
+                    this.random.nextInt(this.view.getHeight()));
+        } while (safeSpace != null && safeSpace.intersects(a));
+        // random velocity
+        int[] vel = new int[2];
+        do {
+            vel[0] = this.random.nextInt(ASTEROID_VELOCITY * 2 + 1)
+                    - ASTEROID_VELOCITY;
+            vel[1] = this.random.nextInt(ASTEROID_VELOCITY * 2 + 1)
+                    - ASTEROID_VELOCITY;
+        } while (vel[0] == 0 && vel[1] == 0);
+        a.setVelocity(vel[0], vel[1]);
+        return a;
+    }
+
+    /**
+     * Create asteroid with random level.
+     *
+     * @param safeSpace space in which asteroid is now allowed.
+     * @return newly created asteroid.
+     */
+    private Asteroid createAsteroid(BaseGameObject safeSpace) {
+        return this.createAsteroid(this.random.nextInt(ASTEROID_LEVEL) + 1,
+                safeSpace);
+    }
+
     public void startGame() {
         // pause game
         this.pauseGame();
-        // remove old objects
+        // clear view
+        this.view.showNotification(null);
         this.view.clearGameElement();
         // create new objects
         this.ship = new SpaceShip();
+        this.bullet = new Line(this.view.getWidth(),
+                (int) (this.ship.getBound() * 1.5));
         this.asteroids = new ArrayList<>();
         // setup new objects
         this.ship.setPosition(this.view.getWidth() / 2,
@@ -64,27 +106,13 @@ public class AsteroidController implements ActionListener, KeyListener {
         };
         safeSpace.setPosition(this.ship.getPosx(), this.ship.getPosy());
         safeSpace.setBound(this.ship.getBound() * SHIP_SAFE_SPACE);
+        // add asteroids
         for (int i = 0; i < ASTEROID_COUNT; i++) {
-            // create new asteroid
-            Asteroid a = new Asteroid(this.random.nextInt(ASTEROID_LEVEL) + 1);
-            // random position
-            do {
-                a.setPosition(this.random.nextInt(this.view.getWidth()),
-                        this.random.nextInt(this.view.getHeight()));
-            } while (safeSpace.collis(a));
-            // random velocity
-            int[] vel = new int[2];
-            do {
-                vel[0] = this.random.nextInt(ASTEROID_VELOCITY * 2 + 1)
-                        - ASTEROID_VELOCITY;
-                vel[1] = this.random.nextInt(ASTEROID_VELOCITY * 2 + 1)
-                        - ASTEROID_VELOCITY;
-            } while (vel[0] == 0 && vel[1] == 0);
-            a.setVelocity(vel[0], vel[1]);
-            // add to asteroid list
-            this.asteroids.add(a);
+            this.asteroids.add(this.createAsteroid(safeSpace)); // random level
         }
         // update view
+        this.view.showEnemyCount(this.asteroids.size());
+        this.view.addGameElement(this.bullet);
         this.view.addGameElement(this.ship);
         this.asteroids.stream().forEach((asteroid) -> {
             this.view.addGameElement(asteroid);
@@ -104,6 +132,12 @@ public class AsteroidController implements ActionListener, KeyListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         synchronized (this.view.getSynchronizedObject()) {
+            //<editor-fold defaultstate="collapsed" desc="win condition">
+            if (this.asteroids.isEmpty()) {
+                this.view.showNotification("You win!");
+                this.pauseGame();
+            }
+            //</editor-fold>
             //<editor-fold defaultstate="collapsed" desc="event handling">
             if (this.keyState.get(KeyEvent.VK_A)
                     && !this.keyState.get(KeyEvent.VK_D)) {
@@ -125,6 +159,34 @@ public class AsteroidController implements ActionListener, KeyListener {
             }
             if (this.keyState.get(KeyEvent.VK_SPACE)) {
                 // fire in the hole!
+                this.bullet.setPosition(this.ship.getPosx(),
+                        this.ship.getPosy());
+                this.bullet.setAngle(this.ship.getFacingAngle());
+                this.bullet.setVisible(true);
+                ArrayList<Asteroid> fired = new ArrayList<>();
+                this.asteroids.stream().forEach((a) -> {
+                    if (a.intersects(this.bullet)) {
+                        fired.add(a);
+                    }
+                });
+                fired.stream().forEach((a) -> {
+                    int currentLevel = a.getLevel();
+                    if (currentLevel > 1) {
+                        for (int i = 0; i < currentLevel; i++) {
+                            Asteroid smaller = this.createAsteroid(
+                                    currentLevel - 1, null);
+                            smaller.setPosition(a.getPosx(), a.getPosy());
+                            this.asteroids.add(smaller);
+                            this.view.addGameElement(smaller);
+                        }
+                    }
+                    this.asteroids.remove(a);
+                    this.view.removeGameElement(a);
+                    this.view.showEnemyCount(this.asteroids.size());
+                });
+            } else {
+                // remove "bullet"
+                this.bullet.setVisible(false);
             }
             //</editor-fold>
             //<editor-fold defaultstate="collapsed" desc="update all objects">
@@ -166,9 +228,13 @@ public class AsteroidController implements ActionListener, KeyListener {
                 }
             });
             //</editor-fold>
+            //<editor-fold defaultstate="collapsed" desc="handling ship if it goes off screen">
+
+            //</editor-fold>
             //<editor-fold defaultstate="collapsed" desc="collision check">
             this.asteroids.stream().forEach((a) -> {
-                if(a.collis(this.ship)) {
+                if (a.intersects(this.ship)) {
+                    this.view.showNotification("You lose!");
                     this.pauseGame();
                 }
             });
