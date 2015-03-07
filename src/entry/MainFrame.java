@@ -1,7 +1,6 @@
 package entry;
 
 import view.BasicGamePanel;
-import java.util.Random;
 import view.game_object.*;
 
 public class MainFrame extends javax.swing.JFrame {
@@ -16,10 +15,6 @@ public class MainFrame extends javax.swing.JFrame {
         this.gamePanel = (BasicGamePanel) this.canvas1;
         SpaceShip t = new SpaceShip();
         this.gamePanel.addGameElement(t);
-        Asteroid a = new Asteroid(40, 20, 20, new Random());
-        a.setPosition(100, 100);
-        a.setVelocity(1, 1);
-        this.gamePanel.addGameElement(a);
     }
 
     /**
