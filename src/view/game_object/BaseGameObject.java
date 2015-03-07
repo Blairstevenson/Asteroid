@@ -10,7 +10,7 @@ public abstract class BaseGameObject extends GameComponent
 
     private boolean visible;
 
-    private int bound;
+    private float bound;
 
     public BaseGameObject() {
         this.visible = true;
@@ -19,12 +19,14 @@ public abstract class BaseGameObject extends GameComponent
     @Override
     public void draw(Graphics g) {
         g.setColor(Color.white);
-        g.drawOval(this.getPosx() - this.bound, this.getPosy() - this.bound,
-                this.bound * 2, this.bound * 2);
+        g.drawOval(Math.round(this.getPosx() - this.bound),
+                Math.round(this.getPosy() - this.bound),
+                Math.round(this.bound * 2),
+                Math.round(this.bound * 2));
     }
 
     @Override
-    public boolean contains(int x, int y) {
+    public boolean contains(float x, float y) {
         return (x - this.getPosx()) * (x - this.getPosx())
                 + (y - this.getPosy()) * (y - this.getPosy())
                 <= this.bound * this.bound;
@@ -41,12 +43,11 @@ public abstract class BaseGameObject extends GameComponent
      * @return point after rotation, in absolute coordinate, not coordinate
      * relative to center point.
      */
-    public static int[] rotate(int x, int y, int cx, int cy, double angle) {
-        return new int[]{
-            (int) Math.round(cx + Math.cos(angle) * x
-            - Math.sin(angle) * y),
-            (int) Math.round(cy + Math.sin(angle) * x
-            + Math.cos(angle) * y)
+    public static float[] rotate(float x, float y,
+            float cx, float cy, float angle) {
+        return new float[]{
+            (float) (cx + Math.cos(angle) * x - Math.sin(angle) * y),
+            (float) (cy + Math.sin(angle) * x + Math.cos(angle) * y)
         };
     }
 
@@ -71,18 +72,18 @@ public abstract class BaseGameObject extends GameComponent
      * @return true if intersect, false otherwise.
      */
     public boolean intersects(Line l) {
-        int[] endPoint = l.getEndPoint();
+        float[] endPoint = l.getEndPoint();
         // directional intersection
-        int dir = (endPoint[0] - l.getPosx()) * (this.getPosx() - l.getPosx())
+        float dir = (endPoint[0] - l.getPosx()) * (this.getPosx() - l.getPosx())
                 + (endPoint[1] - l.getPosy()) * (this.getPosy() - l.getPosy());
         if (dir <= 0) {
             return false;
         } else {
-            double rec = ((endPoint[0] - l.getPosx()) * (l.getPosy() - this.getPosy())
+            float rec = ((endPoint[0] - l.getPosx()) * (l.getPosy() - this.getPosy())
                     - (endPoint[1] - l.getPosy()) * (l.getPosx() - this.getPosx()));
-            double length2 = (endPoint[1] - l.getPosy()) * (endPoint[1] - l.getPosy())
+            float length2 = (endPoint[1] - l.getPosy()) * (endPoint[1] - l.getPosy())
                     + (endPoint[0] - l.getPosx()) * (endPoint[0] - l.getPosx());
-            double distance2 = (rec * rec) / length2;
+            float distance2 = (rec * rec) / length2;
             return distance2 < this.getBound() * this.getBound();
         }
     }
@@ -112,11 +113,11 @@ public abstract class BaseGameObject extends GameComponent
         this.visible = visible;
     }
 
-    public int getBound() {
+    public float getBound() {
         return bound;
     }
 
-    public void setBound(int bound) {
+    public void setBound(float bound) {
         this.bound = bound;
     }
 }

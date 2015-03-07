@@ -6,11 +6,11 @@ import java.awt.Graphics;
 public class SpaceShip extends BaseGameObject {
 
     private static final int radian = 4;
-    private double facingAngle;
+    private float facingAngle;
 
     public SpaceShip() {
         // default
-        this.facingAngle = -Math.PI / 2;
+        this.facingAngle = (float) (-Math.PI / 2);
         this.setBound(10);
         this.setPosition(50, 50);
     }
@@ -19,53 +19,53 @@ public class SpaceShip extends BaseGameObject {
     public void draw(Graphics g) {
         // draw inner circle
         g.setColor(Color.yellow);
-        g.drawOval(this.getPosx() - SpaceShip.radian,
-                this.getPosy() - SpaceShip.radian,
+        g.drawOval(Math.round(this.getPosx() - SpaceShip.radian),
+                Math.round(this.getPosy() - SpaceShip.radian),
                 SpaceShip.radian * 2,
                 SpaceShip.radian * 2);
         // draw pointer line
-        int[] pointStart = SpaceShip.rotate(radian, 0,
+        float[] pointStart = SpaceShip.rotate(radian, 0,
                 this.getPosx(), this.getPosy(), this.facingAngle);
-        int[] pointEnd = SpaceShip.rotate(this.getBound(), 0,
+        float[] pointEnd = SpaceShip.rotate(this.getBound(), 0,
                 this.getPosx(), this.getPosy(), this.facingAngle);
-        g.drawLine(pointStart[0], pointStart[1],
-                pointEnd[0], pointEnd[1]);
+        g.drawLine(Math.round(pointStart[0]), Math.round(pointStart[1]),
+                Math.round(pointEnd[0]), Math.round(pointEnd[1]));
         // draw outer line
         g.setColor(Color.red);
-        int[] outerMid = SpaceShip.rotate((int) (this.getBound() * 1.5), 0,
+        float[] outerMid = SpaceShip.rotate(this.getBound() * 1.5f, 0,
                 this.getPosx(), this.getPosy(),
                 this.facingAngle);
-        int[] outerLeft = SpaceShip.rotate((int) (-this.getBound() * 0.67),
+        float[] outerLeft = SpaceShip.rotate(-this.getBound() * 0.67f,
                 -this.getBound(),
                 this.getPosx(), this.getPosy(), this.facingAngle);
-        int[] outerRight = SpaceShip.rotate((int) (-this.getBound() * 0.67),
+        float[] outerRight = SpaceShip.rotate(-this.getBound() * 0.67f,
                 this.getBound(),
                 this.getPosx(), this.getPosy(), this.facingAngle);
-        g.drawLine(outerMid[0], outerMid[1],
-                outerLeft[0], outerLeft[1]);
-        g.drawLine(outerMid[0], outerMid[1],
-                outerRight[0], outerRight[1]);
-        g.drawLine(outerLeft[0], outerLeft[1],
-                outerRight[0], outerRight[1]);
+        g.drawLine(Math.round(outerMid[0]), Math.round(outerMid[1]),
+                Math.round(outerLeft[0]), Math.round(outerLeft[1]));
+        g.drawLine(Math.round(outerMid[0]), Math.round(outerMid[1]),
+                Math.round(outerRight[0]), Math.round(outerRight[1]));
+        g.drawLine(Math.round(outerLeft[0]), Math.round(outerLeft[1]),
+                Math.round(outerRight[0]), Math.round(outerRight[1]));
     }
 
-    public double getFacingAngle() {
+    public float getFacingAngle() {
         return facingAngle;
     }
 
-    public void setFacingAngle(double facingAngle) {
+    public void setFacingAngle(float facingAngle) {
         this.facingAngle = facingAngle;
     }
 
-    public void moveForward(int step) {
-        int[] newPoint = BaseGameObject.rotate(step, 0,
+    public void moveForward(float step) {
+        float[] newPoint = BaseGameObject.rotate(step, 0,
                 this.getPosx(), this.getPosy(),
                 this.facingAngle);
         this.setPosition(newPoint[0], newPoint[1]);
     }
 
-    public void moveBackward(int step) {
-        int[] newPoint = BaseGameObject.rotate(-step, 0,
+    public void moveBackward(float step) {
+        float[] newPoint = BaseGameObject.rotate(-step, 0,
                 this.getPosx(), this.getPosy(),
                 this.facingAngle);
         this.setPosition(newPoint[0], newPoint[1]);

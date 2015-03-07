@@ -18,8 +18,9 @@ public class AsteroidController implements ActionListener, KeyListener {
     public static final int ASTEROID_LEVEL = 3;
     public static final int ASTEROID_VELOCITY = 3;
     public static final int SHIP_SAFE_SPACE = 8;
-    public static final double SHIP_ROTATE_SPEED = 0.2;
+    public static final float SHIP_ROTATE_SPEED = 0.2f;
     public static final int SHIP_SPEED = 3;
+    public static final float BULLET_SPEED = 5f;
     // general
     private final Random random;
     private final Timer timer;

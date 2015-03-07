@@ -5,10 +5,10 @@ package model;
  */
 public abstract class GameComponent {
 
-    private int posx; // position
-    private int posy;
-    private int velx; // velocity
-    private int vely;
+    private float posx; // position
+    private float posy;
+    private float velx; // velocity
+    private float vely;
 
     /**
      * Check if a point is inside this component.
@@ -17,7 +17,7 @@ public abstract class GameComponent {
      * @param y y coordinate of the point.
      * @return true if the point is inside, false otherwise.
      */
-    public abstract boolean contains(int x, int y);
+    public abstract boolean contains(float x, float y);
 
     /**
      * Move to next position based on velocity.
@@ -27,44 +27,44 @@ public abstract class GameComponent {
         this.posy += this.vely;
     }
 
-    public int getVelx() {
+    public float getVelx() {
         return velx;
     }
 
-    public void setVelx(int velx) {
+    public void setVelx(float velx) {
         this.velx = velx;
     }
 
-    public int getVely() {
+    public float getVely() {
         return vely;
     }
 
-    public void setVely(int vely) {
+    public void setVely(float vely) {
         this.vely = vely;
     }
 
-    public void setVelocity(int velx, int vely) {
+    public void setVelocity(float velx, float vely) {
         this.velx = velx;
         this.vely = vely;
     }
 
-    public int getPosx() {
+    public float getPosx() {
         return posx;
     }
 
-    public void setPosx(int posx) {
+    public void setPosx(float posx) {
         this.posx = posx;
     }
 
-    public int getPosy() {
+    public float getPosy() {
         return posy;
     }
 
-    public void setPosy(int posy) {
+    public void setPosy(float posy) {
         this.posy = posy;
     }
 
-    public void setPosition(int posx, int posy) {
+    public void setPosition(float posx, float posy) {
         this.posx = posx;
         this.posy = posy;
     }
