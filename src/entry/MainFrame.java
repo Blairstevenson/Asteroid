@@ -37,6 +37,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Asteroid");
+        setPreferredSize(new java.awt.Dimension(640, 480));
         setResizable(false);
 
         canvas1.setMinimumSize(new java.awt.Dimension(400, 300));

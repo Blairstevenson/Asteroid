@@ -66,29 +66,6 @@ public abstract class BaseGameObject extends GameComponent
     }
 
     /**
-     * Check if this object intersects a line.
-     *
-     * @param l line to check.
-     * @return true if intersect, false otherwise.
-     */
-    public boolean intersects(Line l) {
-        float[] endPoint = l.getEndPoint();
-        // directional intersection
-        float dir = (endPoint[0] - l.getPosx()) * (this.getPosx() - l.getPosx())
-                + (endPoint[1] - l.getPosy()) * (this.getPosy() - l.getPosy());
-        if (dir <= 0) {
-            return false;
-        } else {
-            float rec = ((endPoint[0] - l.getPosx()) * (l.getPosy() - this.getPosy())
-                    - (endPoint[1] - l.getPosy()) * (l.getPosx() - this.getPosx()));
-            float length2 = (endPoint[1] - l.getPosy()) * (endPoint[1] - l.getPosy())
-                    + (endPoint[0] - l.getPosx()) * (endPoint[0] - l.getPosx());
-            float distance2 = (rec * rec) / length2;
-            return distance2 < this.getBound() * this.getBound();
-        }
-    }
-
-    /**
      * Check if this object is visible in the screen or not.
      *
      * @param top top coordinate of the screen.

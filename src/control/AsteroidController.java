@@ -15,11 +15,12 @@ public class AsteroidController implements ActionListener, KeyListener {
 
     // hard coded constants
     public static final int ASTEROID_COUNT = 10;
-    public static final int ASTEROID_LEVEL = 3;
-    public static final int ASTEROID_VELOCITY = 3;
+    public static final int ASTEROID_LEVEL_MAX = 4;
+    public static final int ASTEROID_VELOCITY_MAX = 3;
     public static final int SHIP_SAFE_SPACE = 8;
-    public static final float SHIP_ROTATE_SPEED = 0.2f;
+    public static final float SHIP_ROTATE_SPEED = 0.15f;
     public static final int SHIP_SPEED = 3;
+    public static final int SHIP_ATTACK_DELAY = 5;
     public static final float BULLET_SPEED = 5f;
     // general
     private final Random random;
@@ -29,7 +30,8 @@ public class AsteroidController implements ActionListener, KeyListener {
     private final HashMap<Integer, Boolean> keyState;
     // game components
     private SpaceShip ship;
-    private Line bullet;
+    private int attackDelay;
+    private ArrayList<Bullet> bullets;
     private ArrayList<Asteroid> asteroids;
 
     public AsteroidController(IAsteroidView view) {
@@ -60,7 +62,7 @@ public class AsteroidController implements ActionListener, KeyListener {
      */
     private Asteroid createAsteroid(int level, BaseGameObject safeSpace) {
         // create new asteroid
-        Asteroid a = new Asteroid(level);
+        Asteroid a = new Asteroid(level, this.random);
         // random position
         do {
             a.setPosition(this.random.nextInt(this.view.getWidth()),
@@ -69,10 +71,10 @@ public class AsteroidController implements ActionListener, KeyListener {
         // random velocity
         int[] vel = new int[2];
         do {
-            vel[0] = this.random.nextInt(ASTEROID_VELOCITY * 2 + 1)
-                    - ASTEROID_VELOCITY;
-            vel[1] = this.random.nextInt(ASTEROID_VELOCITY * 2 + 1)
-                    - ASTEROID_VELOCITY;
+            vel[0] = this.random.nextInt(ASTEROID_VELOCITY_MAX * 2 + 1)
+                    - ASTEROID_VELOCITY_MAX;
+            vel[1] = this.random.nextInt(ASTEROID_VELOCITY_MAX * 2 + 1)
+                    - ASTEROID_VELOCITY_MAX;
         } while (vel[0] == 0 && vel[1] == 0);
         a.setVelocity(vel[0], vel[1]);
         return a;
@@ -85,7 +87,7 @@ public class AsteroidController implements ActionListener, KeyListener {
      * @return newly created asteroid.
      */
     private Asteroid createAsteroid(BaseGameObject safeSpace) {
-        return this.createAsteroid(this.random.nextInt(ASTEROID_LEVEL) + 1,
+        return this.createAsteroid(this.random.nextInt(ASTEROID_LEVEL_MAX) + 1,
                 safeSpace);
     }
 
@@ -97,10 +99,10 @@ public class AsteroidController implements ActionListener, KeyListener {
         this.view.clearGameElement();
         // create new objects
         this.ship = new SpaceShip();
-        this.bullet = new Line(this.view.getWidth(),
-                (int) (this.ship.getBound() * 1.5));
+        this.bullets = new ArrayList<>();
         this.asteroids = new ArrayList<>();
         // setup new objects
+        this.attackDelay = 0;
         this.ship.setPosition(this.view.getWidth() / 2,
                 this.view.getHeight() / 2);
         BaseGameObject safeSpace = new BaseGameObject() {
@@ -113,7 +115,6 @@ public class AsteroidController implements ActionListener, KeyListener {
         }
         // update view
         this.view.showEnemyCount(this.asteroids.size());
-        this.view.addGameElement(this.bullet);
         this.view.addGameElement(this.ship);
         this.asteroids.stream().forEach((asteroid) -> {
             this.view.addGameElement(asteroid);
@@ -152,48 +153,103 @@ public class AsteroidController implements ActionListener, KeyListener {
             }
             if (this.keyState.get(KeyEvent.VK_W)
                     && !this.keyState.get(KeyEvent.VK_S)) {
-                this.ship.moveForward(SHIP_SPEED);
+                float[] pos = this.ship.checkMoveForward(SHIP_SPEED);
+                if (!this.offscreen(pos[0], pos[1],
+                        this.ship.getBound(), this.ship.getBound(),
+                        this.view.getWidth() - this.ship.getBound() * 2,
+                        this.view.getHeight() - this.ship.getBound() * 2)) {
+                    this.ship.setPosition(pos[0], pos[1]);
+                }
             }
             if (this.keyState.get(KeyEvent.VK_S)
                     && !this.keyState.get(KeyEvent.VK_W)) {
-                this.ship.moveBackward(SHIP_SPEED);
+                float[] pos = this.ship.checkMoveBackward(SHIP_SPEED);
+                if (!this.offscreen(pos[0], pos[1],
+                        this.ship.getBound(), this.ship.getBound(),
+                        this.view.getWidth() - this.ship.getBound() * 2,
+                        this.view.getHeight() - this.ship.getBound() * 2)) {
+                    this.ship.setPosition(pos[0], pos[1]);
+                }
             }
             if (this.keyState.get(KeyEvent.VK_SPACE)) {
-                // fire in the hole!
-                this.bullet.setPosition(this.ship.getPosx(),
-                        this.ship.getPosy());
-                this.bullet.setAngle(this.ship.getFacingAngle());
-                this.bullet.setVisible(true);
-                ArrayList<Asteroid> fired = new ArrayList<>();
-                this.asteroids.stream().forEach((a) -> {
-                    if (a.intersects(this.bullet)) {
-                        fired.add(a);
-                    }
-                });
-                fired.stream().forEach((a) -> {
-                    int currentLevel = a.getLevel();
-                    if (currentLevel > 1) {
-                        for (int i = 0; i < currentLevel; i++) {
-                            Asteroid smaller = this.createAsteroid(
-                                    currentLevel - 1, null);
-                            smaller.setPosition(a.getPosx(), a.getPosy());
-                            this.asteroids.add(smaller);
-                            this.view.addGameElement(smaller);
-                        }
-                    }
-                    this.asteroids.remove(a);
-                    this.view.removeGameElement(a);
-                    this.view.showEnemyCount(this.asteroids.size());
-                });
-            } else {
-                // remove "bullet"
-                this.bullet.setVisible(false);
+                if (this.attackDelay == 0) {
+                    // fire in the hole!
+                    Bullet b = new Bullet(this.ship.getFacingAngle(),
+                            BULLET_SPEED);
+                    b.setPosition(this.ship.getPosx(), this.ship.getPosy());
+                    this.bullets.add(b);
+                    this.view.addGameElement(b);
+                }
+                attackDelay++;
+            }
+            if (this.attackDelay != 0) {
+                this.attackDelay++;
+                this.attackDelay %= SHIP_ATTACK_DELAY;
             }
             //</editor-fold>
             //<editor-fold defaultstate="collapsed" desc="update all objects">
             this.ship.update();
+            this.bullets.stream().forEach((b) -> {
+                b.update();
+            });
             this.asteroids.stream().forEach((a) -> {
                 a.update();
+            });
+            //</editor-fold>
+            //<editor-fold defaultstate="collapsed" desc="collision check">
+            // bullets vs asteroids
+            ArrayList<Asteroid> fired = new ArrayList<>();
+            this.asteroids.stream().forEach((a) -> {
+                boolean boom = false;
+                int bullet;
+                for (bullet = 0; bullet < this.bullets.size(); bullet++) {
+                    Bullet b = this.bullets.get(bullet);
+                    if (a.contains(b.getPosx(), b.getPosy())) {
+                        boom = true;
+                        break;
+                    }
+                }
+                if (boom) {
+                    // remove bullet
+                    this.view.removeGameElement(this.bullets.get(bullet));
+                    this.bullets.remove(bullet);
+                    // mark asteroid
+                    fired.add(a);
+                }
+            });
+            fired.stream().forEach((a) -> {
+                int currentLevel = a.getLevel();
+                if (currentLevel > 1) {
+                    for (int i = 0; i < currentLevel; i++) {
+                        Asteroid smaller = this.createAsteroid(
+                                currentLevel - 1, null);
+                        smaller.setPosition(a.getPosx(), a.getPosy());
+                        this.asteroids.add(smaller);
+                        this.view.addGameElement(smaller);
+                    }
+                }
+                this.asteroids.remove(a);
+                this.view.removeGameElement(a);
+                this.view.showEnemyCount(this.asteroids.size());
+            });
+            // ship vs asteroids
+            this.asteroids.stream().forEach((a) -> {
+                if (a.intersects(this.ship)) {
+                    this.view.showNotification("You lose!");
+                    this.pauseGame();
+                }
+            });
+            //</editor-fold>
+            //<editor-fold defaultstate="collapsed" desc="handling any bullet that goes offscreen">
+            ArrayList<Bullet> expired = new ArrayList<>();
+            this.bullets.stream().forEach((b) -> {
+                if (b.offscreen(0, 0, this.view.getWidth(), this.view.getHeight())) {
+                    expired.add(b);
+                }
+            });
+            expired.stream().forEach((b) -> {
+                this.bullets.remove(b);
+                this.view.removeGameElement(b);
             });
             //</editor-fold>
             //<editor-fold defaultstate="collapsed" desc="handling any asteroid that goes offscreen">
@@ -206,22 +262,22 @@ public class AsteroidController implements ActionListener, KeyListener {
                         case 0: // top down
                             a.setPosition(-a.getBound(),
                                     this.random.nextInt(this.view.getWidth()));
-                            a.setVely(this.random.nextInt(ASTEROID_VELOCITY) + 1);
+                            a.setVely(this.random.nextInt(ASTEROID_VELOCITY_MAX) + 1);
                             break;
                         case 1: // bottom up
                             a.setPosition(this.view.getWidth() + a.getBound(),
                                     this.random.nextInt(this.view.getWidth()));
-                            a.setVely(-this.random.nextInt(ASTEROID_VELOCITY) - 1);
+                            a.setVely(-this.random.nextInt(ASTEROID_VELOCITY_MAX) - 1);
                             break;
                         case 2: // from the left
                             a.setPosition(this.random.nextInt(this.view.getHeight()),
                                     -a.getBound());
-                            a.setVelx(this.random.nextInt(ASTEROID_VELOCITY) + 1);
+                            a.setVelx(this.random.nextInt(ASTEROID_VELOCITY_MAX) + 1);
                             break;
                         case 3: // from the right
                             a.setPosition(this.random.nextInt(this.view.getHeight()),
                                     this.view.getHeight() + a.getBound());
-                            a.setVelx(-this.random.nextInt(ASTEROID_VELOCITY) - 1);
+                            a.setVelx(-this.random.nextInt(ASTEROID_VELOCITY_MAX) - 1);
                             break;
                         default:
                             break;
@@ -229,18 +285,15 @@ public class AsteroidController implements ActionListener, KeyListener {
                 }
             });
             //</editor-fold>
-            //<editor-fold defaultstate="collapsed" desc="handling ship if it goes off screen">
-
-            //</editor-fold>
-            //<editor-fold defaultstate="collapsed" desc="collision check">
-            this.asteroids.stream().forEach((a) -> {
-                if (a.intersects(this.ship)) {
-                    this.view.showNotification("You lose!");
-                    this.pauseGame();
-                }
-            });
-            //</editor-fold>
         }
+    }
+
+    private boolean offscreen(float posx, float posy,
+            float top, float left, float w, float h) {
+        return posx < left
+                || posx > left + w
+                || posy < top
+                || posy > top + h;
     }
 
     @Override

@@ -57,6 +57,18 @@ public class SpaceShip extends BaseGameObject {
         this.facingAngle = facingAngle;
     }
 
+    public float[] checkMoveForward(float step) {
+        return BaseGameObject.rotate(step, 0,
+                this.getPosx(), this.getPosy(),
+                this.facingAngle);
+    }
+
+    public float[] checkMoveBackward(float step) {
+        return BaseGameObject.rotate(-step, 0,
+                this.getPosx(), this.getPosy(),
+                this.facingAngle);
+    }
+
     public void moveForward(float step) {
         float[] newPoint = BaseGameObject.rotate(step, 0,
                 this.getPosx(), this.getPosy(),
