@@ -38,7 +38,7 @@ public class Bullet extends BaseGameObject {
 
     @Override
     public void draw(Graphics g) {
-        g.setColor(Color.white);
+        g.setColor(Color.blue);
         g.drawLine(Math.round(this.getPosx()), Math.round(this.getPosy()),
                 Math.round(this.getPosx()), Math.round(this.getPosy()));
     }

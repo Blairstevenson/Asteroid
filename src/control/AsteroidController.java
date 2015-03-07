@@ -29,6 +29,7 @@ public class AsteroidController implements ActionListener, KeyListener {
     private final ArrayList<Integer> keys;
     private final HashMap<Integer, Boolean> keyState;
     // game components
+    private boolean gameEnded;
     private SpaceShip ship;
     private int attackDelay;
     private ArrayList<Bullet> bullets;
@@ -103,6 +104,7 @@ public class AsteroidController implements ActionListener, KeyListener {
         this.asteroids = new ArrayList<>();
         // setup new objects
         this.attackDelay = 0;
+        this.gameEnded = false;
         this.ship.setPosition(this.view.getWidth() / 2,
                 this.view.getHeight() / 2);
         BaseGameObject safeSpace = new BaseGameObject() {
@@ -119,16 +121,25 @@ public class AsteroidController implements ActionListener, KeyListener {
         this.asteroids.stream().forEach((asteroid) -> {
             this.view.addGameElement(asteroid);
         });
-        // resume game
-        this.resumeGame();
+        this.view.showNotification("Press \"P\" key to begin!");
     }
 
     public void pauseGame() {
         this.timer.stop();
+        if (!gameEnded) {
+            this.view.showNotification("Paused!");
+        }
     }
 
     public void resumeGame() {
-        this.timer.start();
+        if (!gameEnded) {
+            this.timer.start();
+            this.view.showNotification(null);
+        }
+    }
+
+    public boolean isPaused() {
+        return !this.timer.isRunning();
     }
 
     @Override
@@ -136,6 +147,7 @@ public class AsteroidController implements ActionListener, KeyListener {
         synchronized (this.view.getSynchronizedObject()) {
             //<editor-fold defaultstate="collapsed" desc="win condition">
             if (this.asteroids.isEmpty()) {
+                this.gameEnded = true;
                 this.view.showNotification("You win!");
                 this.pauseGame();
             }
@@ -235,6 +247,7 @@ public class AsteroidController implements ActionListener, KeyListener {
             // ship vs asteroids
             this.asteroids.stream().forEach((a) -> {
                 if (a.intersects(this.ship)) {
+                    this.gameEnded = true;
                     this.view.showNotification("You lose!");
                     this.pauseGame();
                 }

@@ -57,11 +57,11 @@ public class BasicGamePanel extends Canvas implements IAsteroidView,
                     .forEach((element) -> {
                         element.draw(g);
                     });
-            g.setColor(Color.blue);
+            g.setColor(Color.cyan);
             // draw notification
             if (this.notification != null) {
                 g.drawString(this.notification,
-                        this.getWidth() / 2 - 7 * this.notification.length() / 2,
+                        this.getWidth() / 2 - 6 * this.notification.length() / 2,
                         this.getHeight() / 2 - 5);
             }
             // draw enemy count
