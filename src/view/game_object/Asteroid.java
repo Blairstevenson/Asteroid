@@ -17,7 +17,7 @@ public class Asteroid extends BaseGameObject {
         this.level = level;
         this.setBound(level * Asteroid.BASE_SIZE);
         int sizeRange = (int) (this.getBound() / 2);
-        this.fragmentCount = this.level * 7;
+        this.fragmentCount = this.level * 6;
         // generate random points to draw
         this.setPosition(0, 0);
         this.points = new int[fragmentCount][2];
