@@ -26,27 +26,45 @@ public class BasicGamePanel extends Canvas implements IAsteroidView,
 
     @Override
     public void addGameElement(IDrawable e) {
-        this.elements.add(e);
+        synchronized (this.elements) {
+            this.elements.add(e);
+        }
     }
 
     @Override
     public void removeGameElement(IDrawable e) {
-        this.elements.remove(e);
+        synchronized (this.elements) {
+            this.elements.remove(e);
+        }
+    }
+
+    @Override
+    public void clearGameElement() {
+        synchronized (this.elements) {
+            this.elements.clear();
+        }
     }
 
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         // draw all elements inside this panel
-        this.elements.stream()
-                .filter((element) -> (element.isVisible()))
-                .forEach((element) -> {
-                    element.draw(g);
-                });
+        synchronized (this.elements) {
+            this.elements.stream()
+                    .filter((element) -> (element.isVisible()))
+                    .forEach((element) -> {
+                        element.draw(g);
+                    });
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         this.repaint();
+    }
+
+    @Override
+    public Object getSynchronizedObject() {
+        return this.elements;
     }
 }

@@ -1,7 +1,7 @@
 package entry;
 
+import control.AsteroidController;
 import view.BasicGamePanel;
-import view.game_object.*;
 
 public class MainFrame extends javax.swing.JFrame {
 
@@ -12,9 +12,11 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public MainFrame() {
         initComponents();
+        this.setLocationRelativeTo(null);
         this.gamePanel = (BasicGamePanel) this.canvas1;
-        SpaceShip t = new SpaceShip();
-        this.gamePanel.addGameElement(t);
+        AsteroidController c = new AsteroidController(this.gamePanel);
+        this.addKeyListener(c);
+        c.startGame();
     }
 
     /**
@@ -29,6 +31,7 @@ public class MainFrame extends javax.swing.JFrame {
         canvas1 = new BasicGamePanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Asteroid");
         setResizable(false);
 
         canvas1.setMinimumSize(new java.awt.Dimension(400, 300));
