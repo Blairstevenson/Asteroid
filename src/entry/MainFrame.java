@@ -119,7 +119,7 @@ public class MainFrame extends javax.swing.JFrame {
         this.controller.pauseGame();
         JOptionPane.showMessageDialog(this, "Rotate your ship using \"A\", \"D\".\n"
                 + "Move your ship using \"W\", \"S\".\n"
-                + "\"Enter\" to fire!\n"
+                + "\"Space\" to fire!\n"
                 + "You win after destroyed all those asteroids.\n"
                 + "Don't let your ship crashed! Let's rock!");
         this.controller.resumeGame();
