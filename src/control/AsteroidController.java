@@ -15,6 +15,7 @@ public class AsteroidController implements ActionListener, KeyListener {
 
     // hard coded constants
     public static final int ASTEROID_COUNT = 10;
+    public static final int LIFE_COUNT = 3;
     public static final int ASTEROID_LEVEL_MAX = 4;
     public static final int ASTEROID_VELOCITY_MAX = 3;
     public static final int SHIP_SAFE_SPACE = 8;
@@ -31,6 +32,7 @@ public class AsteroidController implements ActionListener, KeyListener {
     // game components
     private boolean gameEnded;
     private SpaceShip ship;
+    private int lifeCount;
     private int attackDelay;
     private ArrayList<Bullet> bullets;
     private ArrayList<Asteroid> asteroids;
@@ -64,6 +66,11 @@ public class AsteroidController implements ActionListener, KeyListener {
     private Asteroid createAsteroid(int level, BaseGameObject safeSpace) {
         // create new asteroid
         Asteroid a = new Asteroid(level, this.random);
+        this.randomizeAsteroid(a, safeSpace);
+        return a;
+    }
+
+    private void randomizeAsteroid(Asteroid a, BaseGameObject safeSpace) {
         // random position
         do {
             a.setPosition(this.random.nextInt(this.view.getWidth()),
@@ -78,7 +85,6 @@ public class AsteroidController implements ActionListener, KeyListener {
                     - ASTEROID_VELOCITY_MAX;
         } while (vel[0] == 0 && vel[1] == 0);
         a.setVelocity(vel[0], vel[1]);
-        return a;
     }
 
     /**
@@ -103,6 +109,7 @@ public class AsteroidController implements ActionListener, KeyListener {
         this.bullets = new ArrayList<>();
         this.asteroids = new ArrayList<>();
         // setup new objects
+        this.lifeCount = LIFE_COUNT;
         this.attackDelay = 0;
         this.gameEnded = false;
         this.ship.setPosition(this.view.getWidth() / 2,
@@ -116,12 +123,33 @@ public class AsteroidController implements ActionListener, KeyListener {
             this.asteroids.add(this.createAsteroid(safeSpace)); // random level
         }
         // update view
+        this.view.showLifeCount(this.lifeCount);
         this.view.showEnemyCount(this.asteroids.size());
         this.view.addGameElement(this.ship);
         this.asteroids.stream().forEach((asteroid) -> {
             this.view.addGameElement(asteroid);
         });
         this.view.showNotification("Press \"P\" key to begin!");
+    }
+
+    private void newLife() {
+        // place ship at the center of screen
+        this.ship.setPosition(this.view.getWidth() / 2,
+                this.view.getHeight() / 2);
+        this.ship.setFacingAngle((float) (-Math.PI / 2));
+        // place remaining asteroid(s) away from center
+        BaseGameObject safeSpace = new BaseGameObject() {
+        };
+        safeSpace.setPosition(this.ship.getPosx(), this.ship.getPosy());
+        safeSpace.setBound(this.ship.getBound() * SHIP_SAFE_SPACE);
+        this.asteroids.stream().forEach((asteroid) -> {
+            this.randomizeAsteroid(asteroid, safeSpace);
+        });
+        // remove all bullet(s)
+        this.bullets.stream().forEach((b) -> {
+            this.view.removeGameElement(b);
+        });
+        this.bullets.clear();
     }
 
     public void pauseGame() {
@@ -247,9 +275,17 @@ public class AsteroidController implements ActionListener, KeyListener {
             // ship vs asteroids
             this.asteroids.stream().forEach((a) -> {
                 if (a.intersects(this.ship)) {
-                    this.gameEnded = true;
-                    this.view.showNotification("You lose!");
-                    this.pauseGame();
+                    this.lifeCount--;
+                    this.view.showLifeCount(this.lifeCount);
+                    if (this.lifeCount <= 0) {
+                        this.gameEnded = true;
+                        this.pauseGame();
+                        this.view.showNotification("You lose!");
+                    } else {
+                        this.pauseGame();
+                        this.newLife();
+                        this.view.showNotification("Get ready! Press \"P\" to continue!");
+                    }
                 }
             });
             //</editor-fold>

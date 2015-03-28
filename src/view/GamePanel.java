@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.Timer;
+import view.game_object.SpaceShip;
 
 public class GamePanel extends javax.swing.JPanel implements IAsteroidView,
         ActionListener {
@@ -14,6 +15,7 @@ public class GamePanel extends javax.swing.JPanel implements IAsteroidView,
     private final ArrayList<IDrawable> elements;
     private String notification;
     private int enemy;
+    private final ArrayList<SpaceShip> ships;
 
     /**
      * Creates new form DFPanel
@@ -22,6 +24,7 @@ public class GamePanel extends javax.swing.JPanel implements IAsteroidView,
         initComponents();
         this.setBackground(Color.black);
         this.elements = new ArrayList<>();
+        this.ships = new ArrayList<>();
         this.timer = new Timer(50, this);
         this.timer.start();
     }
@@ -71,6 +74,12 @@ public class GamePanel extends javax.swing.JPanel implements IAsteroidView,
             }
             // draw enemy count
             g.drawString("Asteroid: " + this.enemy, 0, 10);
+            // draw life count
+            synchronized (this.ships) {
+                this.ships.stream().forEach((ship) -> {
+                    ship.draw(g);
+                });
+            }
         }
     }
 
@@ -92,6 +101,21 @@ public class GamePanel extends javax.swing.JPanel implements IAsteroidView,
     @Override
     public void showNotification(String notification) {
         this.notification = notification;
+    }
+
+    @Override
+    public void showLifeCount(int life) {
+        synchronized (this.ships) {
+            this.ships.clear();
+            for (int i = 0; i < life; i++) {
+                SpaceShip newShip = new SpaceShip();
+                newShip.setFacingAngle((float) (-Math.PI / 2));
+                newShip.setPosition(
+                        this.getWidth() - newShip.getBound() * (3 * i + 2),
+                        newShip.getBound() * 2);
+                this.ships.add(newShip);
+            }
+        }
     }
 
     /**

@@ -43,6 +43,11 @@ public class MainFrame extends javax.swing.JFrame {
         setTitle("Asteroid");
         setPreferredSize(new java.awt.Dimension(640, 480));
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -142,6 +147,14 @@ public class MainFrame extends javax.swing.JFrame {
             this.controller.pauseGame();
         }
     }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        JOptionPane.showMessageDialog(this, "Rotate your ship using \"A\", \"D\".\n"
+                + "Move your ship using \"W\", \"S\".\n"
+                + "\"Space\" to fire!\n"
+                + "You win after destroyed all those asteroids.\n"
+                + "Don't let your ship crashed! Let's rock!");
+    }//GEN-LAST:event_formWindowOpened
 
     /**
      * @param args the command line arguments
