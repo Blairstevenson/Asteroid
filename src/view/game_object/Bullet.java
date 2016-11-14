@@ -2,6 +2,8 @@ package view.game_object;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.util.Random;
 
 public class Bullet extends BaseGameObject {
 
@@ -35,10 +37,12 @@ public class Bullet extends BaseGameObject {
     public boolean contains(float x, float y) {
         return x == this.getPosx() && y == this.getPosy();
     }
-
+Random rand = new Random();
     @Override
     public void draw(Graphics g) {
-        g.setColor(Color.blue);
+
+        Graphics2D g2 = (Graphics2D) g;
+            g.setColor(new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
         g.drawLine(Math.round(this.getPosx()), Math.round(this.getPosy()),
                 Math.round(this.getPosx()), Math.round(this.getPosy()));
     }

@@ -2,6 +2,16 @@ package view.game_object;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class SpaceShip extends BaseGameObject {
 
@@ -14,9 +24,10 @@ public class SpaceShip extends BaseGameObject {
         this.setBound(10);
         this.setPosition(50, 50);
     }
-
+ private BufferedImage image;
     @Override
     public void draw(Graphics g) {
+        
         // draw inner circle
         g.setColor(Color.yellow);
         g.drawOval(Math.round(this.getPosx() - SpaceShip.radian),
@@ -48,6 +59,7 @@ public class SpaceShip extends BaseGameObject {
         g.drawLine(Math.round(outerLeft[0]), Math.round(outerLeft[1]),
                 Math.round(outerRight[0]), Math.round(outerRight[1]));
     }
+
 
     public float getFacingAngle() {
         return facingAngle;

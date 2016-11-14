@@ -1,7 +1,9 @@
 package view.game_object;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -41,15 +43,21 @@ public class Asteroid extends BaseGameObject {
         return level;
     }
 
+Random rand = new Random();
     @Override
     public void draw(Graphics g) {
-        g.setColor(Color.gray);
+
+        
         for (int i = 0; i < this.points.length; i++) {
             int nextPoint = i + 1;
             if (nextPoint >= this.points.length) {
                 nextPoint = 0;
             }
-            g.drawLine(Math.round(this.getPosx()) + this.points[i][0],
+            
+            Graphics2D g2 = (Graphics2D) g;
+            g.setColor(new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
+            g2.setStroke(new BasicStroke(3));
+            g2.drawLine(Math.round(this.getPosx()) + this.points[i][0],
                     Math.round(this.getPosy()) + this.points[i][1],
                     Math.round(this.getPosx()) + this.points[nextPoint][0],
                     Math.round(this.getPosy()) + this.points[nextPoint][1]);
